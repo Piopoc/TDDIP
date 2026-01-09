@@ -1,0 +1,8 @@
+com.example.demo
+com.example.demo.config
+com.example.demo.controller
+com.example.demo.model
+com.example.demo.repository.elastic
+com.example.demo.repository.mongo
+com.example.demo.service
+com.example.demo.util
