@@ -34,13 +34,6 @@ public class DocumentSearch {
     private String content;
 
     /**
-     * The source URL
-     * Mapped as "FieldType.Keyword" to display all documents given a certain URL
-     */
-    @Field(type = FieldType.Keyword)
-    private String url;
-
-    /**
      * The domain of origin
      * Mapped as "FieldType.Keyword" to facilitate the filtering by source
      */

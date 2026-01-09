@@ -2,21 +2,19 @@ package com.example.demo.service;
 
 import cc.mallet.pipe.*;
 import cc.mallet.topics.ParallelTopicModel;
+import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import com.example.demo.model.DocumentRaw;
 import com.example.demo.model.Topic;
 import com.example.demo.repository.mongo.MongoDocumentRepository;
 import com.example.demo.repository.mongo.TopicRepository;
-import com.example.demo.util.DocumentIterator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * This service performs Topic Modeling (via Mallet) to identify themes within the document corpus;
@@ -39,31 +37,30 @@ public class TopicModelingService {
         List<DocumentRaw> documents = mongoRepository.findAll();
         if (documents.isEmpty()) return;
 
-        String formattedData = documents.stream()
-                .map(doc -> doc.getId() + "\t" + "no_label" + "\t" + doc.getContent())
-                .collect(Collectors.joining("\n"));
-
-        InputStream is = new ByteArrayInputStream(formattedData.getBytes(StandardCharsets.UTF_8));
-
         // Mallet Pre-processing Pipeline: converts raw text into feature sequences
         ArrayList<Pipe> pipeList = new ArrayList<>();
         pipeList.add(new CharSequenceLowercase());  // Normalization
-        pipeList.add(new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")));   // Tokenization
+        pipeList.add(new CharSequence2TokenSequence(Pattern.compile("\\p{L}{3,}")));   // Tokenization
         pipeList.add(new TokenSequence2FeatureSequence());  // Feature extraction
 
         InstanceList instances = new InstanceList(new SerialPipes(pipeList));
-        instances.addThruPipe(new DocumentIterator(is));
+
+        for (DocumentRaw doc : documents) {
+            if (doc.getContent() != null && !doc.getContent().isBlank()) {
+                instances.addThruPipe(new Instance(doc.getContent(), null, doc.getId(), null));
+            }
+        }
 
         // Stores the top 15 words representing the semantic core of each topic (10)
         int numTopics = 10;
         ParallelTopicModel model = new ParallelTopicModel(numTopics);
         model.addInstances(instances);
-        model.setNumIterations(1000);
+        model.setNumIterations(500);
         model.estimate();
 
         topicRepository.deleteAll();    // Reset topics from the previous analysis
         List<Topic> globalTopics = new ArrayList<>();
-        Object[][] topWords = model.getTopWords(15);
+        Object[][] topWords = model.getTopWords(10);
 
         for(int i = 0; i<numTopics; i++){
             Topic newTopic = new Topic();
@@ -79,18 +76,20 @@ public class TopicModelingService {
         topicRepository.saveAll(globalTopics);
 
         // Updates each document with its probability distribution
-        // Only assignments exceeding a significance threshold (0.01) are persisted
-        for (int i = 0; i < documents.size(); i++) {
+        // Only assignments exceeding a significance threshold (0.05) are persisted
+        for (int i = 0; i < instances.size(); i++) {
             double[] probs = model.getTopicProbabilities(i);
-            Map<Integer, Double> assignments =new HashMap<>();
+            Map<Integer, Double> assignments = new HashMap<>();
             for (int j = 0; j < numTopics; j++) {
-                if(probs[j] > 0.01){
+                if(probs[j] > 0.05) {
                     assignments.put(j, probs[j]);
                 }
             }
-            DocumentRaw doc = documents.get(i);
-            doc.setTopicAssignment(assignments);
-            mongoRepository.save(doc);
+            String docId = (String) instances.get(i).getName();
+            mongoRepository.findById(docId).ifPresent(doc -> {
+                doc.setTopicAssignment(assignments);
+                mongoRepository.save(doc);
+            });
         }
     }
 }

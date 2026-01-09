@@ -32,9 +32,4 @@ public interface ElasticDocumentRepository extends ElasticsearchRepository<Docum
      * Filters documents by matching a substring within the 'title' field
      */
     List<DocumentSearch> findByTitleContaining(String title);
-
-    /**
-     * Filters documents by matching a substring within the 'url' field
-     */
-    List<DocumentSearch> findByUrlContaining(String url);
 }
