@@ -54,14 +54,12 @@ class DocumentControllerTest {
         testDocument.setTitle("Test Title");
         testDocument.setContent("Test content for searching");
         testDocument.setDomain("test.com");
-        testDocument.setUrl("https://test.com/article");
 
         DocumentSearch testDocument2 = new DocumentSearch();
         testDocument2.setId("test-id-2");
         testDocument2.setTitle("Another Test");
         testDocument2.setContent("Another test content");
         testDocument2.setDomain("example.com");
-        testDocument2.setUrl("https://example.com/article");
 
         testDocuments = Arrays.asList(testDocument, testDocument2);
     }
