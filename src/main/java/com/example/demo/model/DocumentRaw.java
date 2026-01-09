@@ -1,9 +1,11 @@
 package com.example.demo.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.*;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -17,7 +19,6 @@ import java.util.Map;
 public class DocumentRaw {
     @Id
     private String id;
-    private String url;
     private String domain;
     private String title;
 
@@ -29,10 +30,22 @@ public class DocumentRaw {
     private String content;
 
     private String date;
-    private int documentLength;
 
     /**
      * Maps the Topic ID to its corresponding weight for this document
      */
     private Map<Integer, Double> topicAssignment;
+
+    @JsonIgnore
+    private Map<String, Object> additionalFields = new HashMap<>();
+
+    @JsonAnySetter
+    public void addAdditionalField(String key, Object value) {
+        this.additionalFields.put(key, value);
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalFields() {
+        return additionalFields;
+    }
 }

@@ -41,7 +41,7 @@ public class IndexService {
 
         elasticDocumentRepository.saveAll(searchDocs);
 
-        System.out.println("--- Sincronizzazione completata! Indicizzati " + searchDocs.size() + " documenti su Elastic. ---");
+        System.out.println("--- Sincronizzazione completata! ---");
     }
 
     /**
@@ -53,7 +53,6 @@ public class IndexService {
 
         search.setId(raw.getId());
         search.setTitle(raw.getTitle());
-        search.setUrl(raw.getUrl());
         search.setDomain(raw.getDomain());
         search.setContent(raw.getContent());
 
