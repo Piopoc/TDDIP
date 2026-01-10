@@ -25,7 +25,8 @@ public class TextCleaner {
     }
 
     // Regular expression for noise reduction and tokenization
-    private static final Pattern TOKEN_PATTERN = Pattern.compile("\\w+");
+    //"(?U)" to enable UNICODE characters, "\\w+" to enable ASCII
+    private static final Pattern TOKEN_PATTERN = Pattern.compile("(?U)\\w+");
     private static final Pattern MULTI_SPACE_PATTERN = Pattern.compile("\\s{2,}");
     private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+");
 
