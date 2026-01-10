@@ -73,7 +73,8 @@ class TextCleanerTest {
     void testRemoveStopwords_Basic() {
         String input = "Pippo is a dog";
         String result = TextCleaner.removeStopwordsStatic(input, stopWords);
-        assertEquals("Pippo dog", result);
+        // Il metodo converte tutto in lowercase
+        assertEquals("pippo dog", result);
     }
 
     @Test
@@ -106,5 +107,169 @@ class TextCleanerTest {
         // Act & Assert
         assertNull(TextCleaner.removeStopwordsStatic(null, stopWords));
         assertEquals("", TextCleaner.removeStopwordsStatic("", stopWords));
+    }
+
+
+    @Test
+    @DisplayName("removeStopwords - Null Stopwords Set")
+    void testRemoveStopwords_NullStopwordsSet() {
+        // Arrange
+        String input = "Hello world the cat";
+
+        // Act & Assert
+        // The method throws NullPointerException when stopwords.contains() is called on null
+        assertThrows(NullPointerException.class, () -> {
+            TextCleaner.removeStopwordsStatic(input, null);
+        });
+    }
+
+    @Test
+    @DisplayName("removeStopwords - Empty Stopwords Set")
+    void testRemoveStopwords_EmptyStopwordsSet() {
+        // Arrange
+        String input = "Hello world the cat";
+        Set<String> emptyStopWords = Set.of(); // Set vuoto
+
+        // Act
+        String result = TextCleaner.removeStopwordsStatic(input, emptyStopWords);
+
+        // Assert
+        // Con stopwords vuoto, dovrebbe mantenere tutte le parole (lowercase)
+        assertEquals("hello world the cat", result);
+    }
+
+// ==================== Test per caratteri speciali ====================
+
+    @Test
+    @DisplayName("removeStopwords - Special Characters Punctuation")
+    void testRemoveStopwords_SpecialCharactersPunctuation() {
+        // Arrange
+        String input = "Hello, world! How are you?";
+
+        // Act
+        String result = TextCleaner.removeStopwordsStatic(input, stopWords);
+
+        // Assert
+        assertNotNull(result);
+        // Verifica che la punteggiatura sia rimossa
+        assertFalse(result.contains(","));
+        assertFalse(result.contains("!"));
+        assertFalse(result.contains("?"));
+        // Verifica che le parole rimangano (in lowercase)
+        assertTrue(result.contains("hello"));
+        assertTrue(result.contains("world"));
+        assertTrue(result.contains("how"));
+        assertTrue(result.contains("are"));
+        assertTrue(result.contains("you"));
+    }
+
+    @Test
+    @DisplayName("removeStopwords - Special Characters Symbols")
+    void testRemoveStopwords_SpecialCharactersSymbols() {
+        // Arrange
+        String input = "Email: test@example.com #hashtag @mention";
+
+        // Act
+        String result = TextCleaner.removeStopwordsStatic(input, stopWords);
+
+        // Assert
+        assertNotNull(result);
+        // Verifica che il metodo non crashi con caratteri speciali
+        assertTrue(result.length() > 0);
+        // Verifica che estragga le parole valide
+        assertTrue(result.contains("email"));
+        assertTrue(result.contains("test"));
+        assertTrue(result.contains("example"));
+        assertTrue(result.contains("com"));
+        assertTrue(result.contains("hashtag"));
+        assertTrue(result.contains("mention"));
+    }
+
+    @Test
+    @DisplayName("removeStopwords - Only Special Characters")
+    void testRemoveStopwords_OnlySpecialCharacters() {
+        // Arrange
+        String input = "!@#$%^&*()";
+
+        // Act
+        String result = TextCleaner.removeStopwordsStatic(input, stopWords);
+
+        // Assert
+        // Non ci sono token validi, quindi ritorna stringa vuota
+        assertNotNull(result);
+        assertTrue(result.isEmpty() || result.isBlank());
+    }
+
+    @Test
+    @DisplayName("removeStopwords - Unicode Accented Characters")
+    void testRemoveStopwords_UnicodeAccents() {
+        // Arrange
+        String input = "café résumé naïve";
+
+        // Act
+        String result = TextCleaner.removeStopwordsStatic(input, stopWords);
+
+        // Assert
+        assertNotNull(result);
+        // Verifica che gestisca correttamente gli accenti (in lowercase)
+        assertEquals("café résumé naïve", result);
+    }
+
+// ==================== Test per edge cases ====================
+
+    @Test
+    @DisplayName("removeStopwords - Very Long Text")
+    void testRemoveStopwords_VeryLongText() {
+        // Arrange
+        String input = "word ".repeat(1000) + "test"; // 1000 parole + "test"
+
+        // Act
+        String result = TextCleaner.removeStopwordsStatic(input, stopWords);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.contains("test"));
+        // Verifica che non crashi con testi molto lunghi
+    }
+
+    @Test
+    @DisplayName("removeStopwords - Only Stopwords")
+    void testRemoveStopwords_OnlyStopwords() {
+        // Arrange
+        String input = "the is of and a to in";
+
+        // Act
+        String result = TextCleaner.removeStopwordsStatic(input, stopWords);
+
+        // Assert
+        // Se tutte le parole sono stopwords, dovrebbe ritornare stringa vuota
+        assertNotNull(result);
+        assertTrue(result.isEmpty() || result.isBlank());
+    }
+
+    @Test
+    @DisplayName("removeStopwords - Single Word Stopword")
+    void testRemoveStopwords_SingleWordStopword() {
+        // Arrange
+        String input = "the";
+
+        // Act
+        String result = TextCleaner.removeStopwordsStatic(input, stopWords);
+
+        // Assert
+        assertTrue(result.isEmpty() || result.isBlank());
+    }
+
+    @Test
+    @DisplayName("removeStopwords - Single Word Non-Stopword")
+    void testRemoveStopwords_SingleWordNonStopword() {
+        // Arrange
+        String input = "hello";
+
+        // Act
+        String result = TextCleaner.removeStopwordsStatic(input, stopWords);
+
+        // Assert
+        assertEquals("hello", result);
     }
 }
