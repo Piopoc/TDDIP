@@ -9,12 +9,15 @@ import java.util.*;
  * and filters out redundant metadata before the persistence phase
  */
 public class JsonlEnhancer {
+
     private static final Set<String> COLUMNS_TO_REMOVE = Set.of(
-            "sources", "documentLength"
+            "sources", "documentLength", "additionalFields"
     );
+
     private static final List<String> COLUMN_ORDER = Arrays.asList(
             "id", "url", "domain", "title", "text", "date"
     );
+
     public static void main(String[] args) {
         processFile("dataset/output/cleaned_articles.jsonl", "dataset/output/enhanced_articles.jsonl");
         processFile("dataset/output/cleaned_parlamint.jsonl", "dataset/output/enhanced_parlamint.jsonl");
@@ -33,12 +36,36 @@ public class JsonlEnhancer {
             while ((line = reader.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
                 JSONObject original = new JSONObject(line);
+                String id = original.optString("id", "");
+
+                if (!isNewsId(id)) {
+                    if (original.has("additionalFields")) {
+                        Object fieldObj = original.get("additionalFields");
+                        if (fieldObj instanceof JSONObject) {
+                            JSONObject extras = (JSONObject) fieldObj;
+                            for (String key : extras.keySet()) {
+                                original.put(key, extras.get(key));
+                            }
+                        }
+                    }
+                }
+
                 writer.write(buildOrderedJson(original));
                 writer.newLine();
             }
             System.out.println("Enhancer completato: " + output);
         } catch (IOException e) {
             System.err.println("Errore in Enhancer: " + e.getMessage());
+        }
+    }
+
+    private static boolean isNewsId(String id) {
+        if (id == null) return false;
+        try {
+            Long.parseLong(id);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
@@ -49,7 +76,6 @@ public class JsonlEnhancer {
         StringBuilder json = new StringBuilder("{");
         boolean first = true;
 
-        // Core
         for (String key : COLUMN_ORDER) {
             if (obj.has(key) && !COLUMNS_TO_REMOVE.contains(key)) {
                 if (!first) json.append(",");
@@ -58,7 +84,6 @@ public class JsonlEnhancer {
             }
         }
 
-        // Extra Field
         for (String key : obj.keySet()) {
             if (!COLUMN_ORDER.contains(key) && !COLUMNS_TO_REMOVE.contains(key)) {
                 if (!first) json.append(",");
