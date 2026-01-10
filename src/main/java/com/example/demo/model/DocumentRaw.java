@@ -36,16 +36,24 @@ public class DocumentRaw {
      */
     private Map<Integer, Double> topicAssignment;
 
-    @JsonIgnore
-    private Map<String, Object> additionalFields = new HashMap<>();
-
-    @JsonAnySetter
-    public void addAdditionalField(String key, Object value) {
-        this.additionalFields.put(key, value);
-    }
-
-    @JsonAnyGetter
-    public Map<String, Object> getAdditionalFields() {
-        return additionalFields;
-    }
+    private String speaker_name;
+    private String speaker_party;
+    private String speaker_party_name;
+    private String speaker_gender;
+    private String speaker_role;
+    private String speaker_id;
+    private String speaker_mp;
+    private String speaker_birth;
+    private String speaker_minister;
+    private String party_status;
+    private String party_orientation;
+    private String subcorpus;
+    private String session;
+    private String body;
+    private String agenda;
+    private String topic;
+    private String meeting;
+    private String sitting;
+    private String term;
+    private String lang;
 }

@@ -36,19 +36,6 @@ public class JsonlEnhancer {
             while ((line = reader.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
                 JSONObject original = new JSONObject(line);
-                String id = original.optString("id", "");
-
-                if (!isNewsId(id)) {
-                    if (original.has("additionalFields")) {
-                        Object fieldObj = original.get("additionalFields");
-                        if (fieldObj instanceof JSONObject) {
-                            JSONObject extras = (JSONObject) fieldObj;
-                            for (String key : extras.keySet()) {
-                                original.put(key, extras.get(key));
-                            }
-                        }
-                    }
-                }
 
                 writer.write(buildOrderedJson(original));
                 writer.newLine();
@@ -56,16 +43,6 @@ public class JsonlEnhancer {
             System.out.println("Enhancer completato: " + output);
         } catch (IOException e) {
             System.err.println("Errore in Enhancer: " + e.getMessage());
-        }
-    }
-
-    private static boolean isNewsId(String id) {
-        if (id == null) return false;
-        try {
-            Long.parseLong(id);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
         }
     }
 
