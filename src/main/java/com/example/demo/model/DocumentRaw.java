@@ -16,6 +16,7 @@ import java.util.Map;
  */
 @Data
 @Document(collection = "raw_documents")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DocumentRaw {
     @Id
     private String id;
