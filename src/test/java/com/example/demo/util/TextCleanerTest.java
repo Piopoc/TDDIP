@@ -138,7 +138,7 @@ class TextCleanerTest {
         assertEquals("hello world the cat", result);
     }
 
-// ==================== Test per caratteri speciali ====================
+// ==================== Test for special characters ====================
 
     @Test
     @DisplayName("removeStopwords - Special Characters Punctuation")
@@ -151,11 +151,11 @@ class TextCleanerTest {
 
         // Assert
         assertNotNull(result);
-        // Verifica che la punteggiatura sia rimossa
+        // Verify that the puntuaction is removed
         assertFalse(result.contains(","));
         assertFalse(result.contains("!"));
         assertFalse(result.contains("?"));
-        // Verifica che le parole rimangano (in lowercase)
+        // Verify that the words remain(in lowercase)
         assertTrue(result.contains("hello"));
         assertTrue(result.contains("world"));
         assertTrue(result.contains("how"));
@@ -174,7 +174,7 @@ class TextCleanerTest {
 
         // Assert
         assertNotNull(result);
-        // Verifica che il metodo non crashi con caratteri speciali
+        // Verify that the method doesn't crush with special character
         assertTrue(result.length() > 0);
         // Verifica che estragga le parole valide
         assertTrue(result.contains("email"));
@@ -195,7 +195,7 @@ class TextCleanerTest {
         String result = TextCleaner.removeStopwordsStatic(input, stopWords);
 
         // Assert
-        // Non ci sono token validi, quindi ritorna stringa vuota
+        // there are valid tokens, returns a null string
         assertNotNull(result);
         assertTrue(result.isEmpty() || result.isBlank());
     }
@@ -211,11 +211,11 @@ class TextCleanerTest {
 
         // Assert
         assertNotNull(result);
-        // Verifica che gestisca correttamente gli accenti (in lowercase)
+        // Verify the right handle of the accents (in lowercase)
         assertEquals("café résumé naïve", result);
     }
 
-// ==================== Test per edge cases ====================
+// ==================== Test for edge cases ====================
 
     @Test
     @DisplayName("removeStopwords - Very Long Text")
@@ -227,9 +227,9 @@ class TextCleanerTest {
         String result = TextCleaner.removeStopwordsStatic(input, stopWords);
 
         // Assert
+        // Verify  that there isn't a crash  when there is a very long test
         assertNotNull(result);
         assertTrue(result.contains("test"));
-        // Verifica che non crashi con testi molto lunghi
     }
 
     @Test
@@ -242,7 +242,7 @@ class TextCleanerTest {
         String result = TextCleaner.removeStopwordsStatic(input, stopWords);
 
         // Assert
-        // Se tutte le parole sono stopwords, dovrebbe ritornare stringa vuota
+        // if all words are stopwords, should return an empty string
         assertNotNull(result);
         assertTrue(result.isEmpty() || result.isBlank());
     }
